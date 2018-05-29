@@ -3,4 +3,5 @@ data/glove*
 .vscode
 *__pycache__*
 *.tsv
-
+*.ctf
+*.pkl
