@@ -25,6 +25,7 @@ def download(version):
 			wget.download(url, out='v1')
 		os.rename('v1/train_v1.1.json.gz', 'v1/train.json.gz')
 		os.rename('v1/dev_v1.1.json.gz', 'v1/dev.json.gz')
+		os.rename('v1/test_public_v1.1.json.gz', 'v1/test_public.json.gz')
 		shutil.copy('v1/dev.json.gz', 'v1/test.json.gz')
 		wget.download('http://nlp.stanford.edu/data/wordvecs/glove.840B.300d.zip')
 		with zipfile.ZipFile("glove.840B.300d.zip", "r") as zip_ref:

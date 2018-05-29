@@ -116,4 +116,5 @@ def convert(file_name, outfile, is_test):
 if __name__ == '__main__':
     convert('v1/train.json.gz', 'train.tsv', False)
     convert('v1/dev.json.gz', 'dev.tsv', False)
-    convert('v1/dev.json.gz', 'test.tsv', True)
+    convert('v1/test.json.gz', 'test.tsv', True)
+    convert('v1/test_public.json.gz', 'test_public.tsv', True)
