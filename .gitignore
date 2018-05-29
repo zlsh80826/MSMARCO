@@ -1,3 +1,6 @@
 data/v1/*
 data/glove*
+.vscode
+*__pycache__*
+*.tsv
 
