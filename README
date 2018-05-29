@@ -1,0 +1,2 @@
+It's a repo to train S-Net extraction with some modification on MSMARCO dataset.
+The data structure is base on https://github.com/Microsoft/CNTK/tree/nikosk/bidaf/Examples/Text/BidirectionalAttentionFlow/msmarco
