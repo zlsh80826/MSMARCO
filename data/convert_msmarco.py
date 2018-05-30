@@ -7,7 +7,7 @@ import bisect
 import numpy as np
 import multiprocessing
 import time
-import utils
+from utils import smith_waterman
 
 def preprocess(s):
     return s.replace("''", '" ').replace("``", '" ')
