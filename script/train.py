@@ -332,7 +332,6 @@ def test(test_data, model_path, model_file, config_file):
                 seq_where = np.argwhere(span[seq])[:,0]
                 span_begin = np.min(seq_where)
                 span_end = np.max(seq_where)
-                print(span_begin, span_end)
                 predict_answer = get_answer(raw_text, ctokens, span_begin, span_end)
                 results['query_id'] = int(uid)
                 results['answers'] = [predict_answer]
