@@ -54,14 +54,14 @@ sh run.sh
 #### This implementation
 ||rouge-l|bleu_1|
 |---|---|---|
-|MSMARCO V1 w/o elmo|38.43 | 39.14|
-|MSMARCO V1 w/  elmo|working|working|
+|MSMARCO v1 w/o elmo|38.43 | 39.14|
+|MSMARCO v1 w/  elmo|working|working|
 |MSMARCO v2 w/o elmo|working|working|
 |MSMARCO v2 w   elmo|working|working|
 
 ## TODO
 - [ ] Multi-threads preprocessing 
 - [ ] Elmo-Embedding
-- [V] Evaluation script
+- [X] Evaluation script
 - [ ] MSMARCO v2 support
 - [ ] Reasonable metrics
