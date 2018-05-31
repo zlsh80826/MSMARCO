@@ -42,9 +42,26 @@ cd ../script
 mkdir log
 sh run.sh
 ```
+
+### Performance
+
+#### Paper
+||rouge-l|bleu_1|
+|---|---|---|
+|S-Net (Extraction)|41.45|44.08|
+|S-Net (Extraction, Ensemble)|42.92|44.97|
+
+#### This implementation
+||rouge-l|bleu_1|
+|---|---|---|
+|MSMARCO V1 w/o elmo|38.43 | 39.14|
+|MSMARCO V1 w/  elmo|working|working|
+|MSMARCO v2 w/o elmo|working|working|
+|MSMARCO v2 w   elmo|working|working|
+
 ## TODO
 - [ ] Multi-threads preprocessing 
 - [ ] Elmo-Embedding
-- [ ] Evaluation script
+- [V] Evaluation script
 - [ ] MSMARCO v2 support
 - [ ] Reasonable metrics
