@@ -5,6 +5,7 @@ import pickle
 import importlib
 import os
 import math
+import h5py
 
 
 class PolyMath:
@@ -56,8 +57,8 @@ class PolyMath:
         return C.reduce_max(conv_out, axis=1)
 
     def embed(self):
-        npglove = np.zeros((self.wg_dim, 300), dtype=np.float32)
-        #hf = h5py.File(os.path.join(self.abs_path, '../dataset/elmo_embedding.bin'), 'r')
+        npglove = np.zeros((self.wg_dim, 1024 + 300), dtype=np.float32)
+        hf = h5py.File(os.path.join(self.abs_path, '../data/elmo_embedding.bin'), 'r')
         #f5_exception = dict()
 
         ## add vocab_use map
@@ -78,10 +79,10 @@ class PolyMath:
                     try:
                         if len(parts) == 301:
                             npglove[self.vocab[word],:300] = np.asarray([float(p) for p in parts[-300:]])
-#                            npglove[self.vocab[word],300:] = np.average(hf[word][:], axis=0)
+                            npglove[self.vocab[word],300:] = np.average(hf[word][:], axis=0)
 #                            vocabs_use[word] = True
                     except:
-                        # npglove[self.vocab[word],300:] = np.average(hf['<UNK>'][:], axis=0)
+                        npglove[self.vocab[word],300:] = np.average(hf['<UNK>'][:], axis=0)
                         print(word)
 
         #for v in vocabs_use:
@@ -93,7 +94,7 @@ class PolyMath:
         #            print('except: ', v)
 
         glove = C.constant(npglove)
-        nonglove = C.parameter(shape=(self.wn_dim, 300), init=C.glorot_uniform(), name='TrainableE')
+        nonglove = C.parameter(shape=(self.wn_dim, 1024 + 300), init=C.glorot_uniform(), name='TrainableE')
         
         def func(wg, wn):
             return C.times(wg, glove) + C.times(wn, nonglove)
@@ -116,7 +117,7 @@ class PolyMath:
             C.reshape(self.charcnn(input_chars), self.convs),
             self.embed()(input_glove_words, input_nonglove_words), name='splice_embed')
 
-        highway = HighwayNetwork(dim=600, highway_layers=self.highway_layers)(embedded)
+        highway = HighwayNetwork(dim=1024 + 600, highway_layers=self.highway_layers)(embedded)
         highway_drop = C.layers.Dropout(self.dropout)(highway)
         processed = OptimizedRnnStack(self.hidden_dim,
              num_layers=1,
