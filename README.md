@@ -10,9 +10,10 @@ There are some required library for training, if you have any problem, please co
 Here are the suggested version.
 
 ### General
-* cuda-9.0
-* openmpi-1.10
 * python3.6
+* cuda-9.0 (CNTK required)
+* openmpi-1.10 (CNTK required)
+* gcc >= 6 (CNTK required)
 
 ### Python
 * Please refer requirements.txt
@@ -55,7 +56,7 @@ sh run.sh
 ||rouge-l|bleu_1|
 |---|---|---|
 |MSMARCO v1 w/o elmo|38.43 | 39.14|
-|MSMARCO v1 w/  elmo|working|working|
+|MSMARCO v1 w/  elmo|38.63 | 39.21|
 |MSMARCO v2 w/o elmo|working|working|
 |MSMARCO v2 w   elmo|working|working|
 
