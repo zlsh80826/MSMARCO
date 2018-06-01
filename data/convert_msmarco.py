@@ -7,6 +7,7 @@ import bisect
 import numpy as np
 import multiprocessing
 import time
+import argparse
 from utils import smith_waterman
 
 def preprocess(s):
@@ -114,7 +115,11 @@ def convert(file_name, outfile, is_test):
     print('Take', end - start, 'second.')
 
 if __name__ == '__main__':
-    convert('v1/train.json.gz', 'train.tsv', False)
-    convert('v1/dev.json.gz', 'dev.tsv', False)
-    convert('v1/test.json.gz', 'test.tsv', True)
-    convert('v1/test_public.json.gz', 'test_public.tsv', True)
+    parser = argparse.ArgumentParser(description='Convert MSMARCO raw data to tsv format')
+    parser.add_argument('--threads', help='Number of threads to multi-preprocessing', default=1, type=int)
+    args = vars(parser.parse_args())
+    print(args)
+#    convert('v1/train.json.gz', 'train.tsv', False)
+#    convert('v1/dev.json.gz', 'dev.tsv', False)
+#    convert('v1/test.json.gz', 'test.tsv', True)
+#    convert('v1/test_public.json.gz', 'test_public.tsv', True)
