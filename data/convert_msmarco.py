@@ -118,8 +118,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Convert MSMARCO raw data to tsv format')
     parser.add_argument('--threads', help='Number of threads to multi-preprocessing', default=1, type=int)
     args = vars(parser.parse_args())
-    print(args)
-#    convert('v1/train.json.gz', 'train.tsv', False)
-#    convert('v1/dev.json.gz', 'dev.tsv', False)
-#    convert('v1/test.json.gz', 'test.tsv', True)
-#    convert('v1/test_public.json.gz', 'test_public.tsv', True)
+
+    convert('v1/train.json.gz', 'train.tsv', False)
+    convert('v1/dev.json.gz', 'dev.tsv', False)
+    convert('v1/test.json.gz', 'test.tsv', True)
+    convert('v1/test_public.json.gz', 'test_public.tsv', True)
