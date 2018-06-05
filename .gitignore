@@ -5,3 +5,4 @@ data/glove*
 *.tsv
 *.ctf
 *.pkl
+data/elmo_embedding.bin
