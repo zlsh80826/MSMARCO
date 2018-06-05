@@ -37,6 +37,11 @@ Convert tsv format to ctf(CNTK input) format and build vocabs dictionary
 python3.6 tsv2ctf.py
 ```
 
+Generate elmo embedding
+```
+sh elmo.sh
+```
+
 ### Train
 ``` 
 cd ../script
@@ -62,7 +67,7 @@ sh run.sh
 
 ## TODO
 - [ ] Multi-threads preprocessing 
-- [ ] Elmo-Embedding
+- [X] Elmo-Embedding
 - [X] Evaluation script
 - [ ] MSMARCO v2 support
 - [ ] Reasonable metrics
