@@ -61,7 +61,7 @@ sh run.sh
 ||rouge-l|bleu_1|
 |---|---|---|
 |MSMARCO v1 w/o elmo|38.43 | 39.14|
-|MSMARCO v1 w/  elmo|38.63 | 39.21|
+|MSMARCO v1 w/  elmo|39.45 | 39.47|
 |MSMARCO v2 w/o elmo|working|working|
 |MSMARCO v2 w   elmo|working|working|
 
