@@ -45,7 +45,7 @@ def process(i, j, is_test):
 
     temp = ' '.join(pp['passage_text'] for pp in p)
     if yesno:
-        temp += ' Yes No'
+        temp += ' Yes No Answer Present .'
     context = preprocess(temp)
 
     ctokens = trim_empty(tokenize(context, context_mode=True))
@@ -86,22 +86,42 @@ def process(i, j, is_test):
         
     return outputs
                 
-def convert(file_name, outfile, is_test):
+def convert(file_name, outfile, is_test, num_threads, version):
     print('Generating', outfile, '...')
     start = time.perf_counter()
-    data = []
-    with gzip.open(file_name, 'rb') as f:
-        for line in f:
-            data.append(json.loads(line))
-            
-    pool = multiprocessing.Pool()
-    results = []
-    for idx, d in enumerate(tqdm(data)):
-        result = pool.apply_async(process, args=(idx, d, is_test))
-        results.append(result)
+
+    if version == 'v1':
+        ##### v1 ####
+        data = []
+        with gzip.open(file_name, 'rb') as f:
+            for line in f:
+                data.append(json.loads(line))
+    elif version == 'v2':
+        #### v2 ####
+        data = []
+        with gzip.open(file_name, 'rb') as f:
+            raw_data = json.load(f)
+
+        for id_ in raw_data['query_id']:
+            dict_ = dict()
+            dict_['passages'] = raw_data['passages'][id_]
+            dict_['query'] = raw_data['query'][id_]
+            dict_['query_id'] = id_
+            dict_['query_type'] = raw_data['query_type'][id_]
+            if not is_test:
+                dict_['answers'] = raw_data['answers'][id_]
+            data.append(dict_)
+    else:
+        raise NotImplementedError
+
+    with multiprocessing.Pool(num_threads) as pool:
+        results = []
+        for idx, d in enumerate(tqdm(data)):
+            result = pool.apply_async(process, args=(idx, d, is_test))
+            results.append(result)
+        pool.close()
+        pool.join()
         
-    pool.close()
-    pool.join()
     outputs = []
 
     for result in results:
@@ -117,9 +137,18 @@ def convert(file_name, outfile, is_test):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Convert MSMARCO raw data to tsv format')
     parser.add_argument('--threads', help='Number of threads to multi-preprocessing', default=1, type=int)
+    parser.add_argument('version', choices=['v1', 'v2'])
     args = vars(parser.parse_args())
 
-    convert('v1/train.json.gz', 'train.tsv', False)
-    convert('v1/dev.json.gz', 'dev.tsv', False)
-    convert('v1/test.json.gz', 'test.tsv', True)
-    convert('v1/test_public.json.gz', 'test_public.tsv', True)
+    if args['version'] == 'v1':
+        convert('v1/train.json.gz', 'train.tsv', False, args['threads'], args['version'])
+        convert('v1/dev.json.gz', 'dev.tsv', False, args['threads'], args['version'])
+        convert('v1/test.json.gz', 'test.tsv', True, args['threads'], args['version'])
+        convert('v1/test_public.json.gz', 'test_public.tsv', True, args['threads'], args['version'])
+
+    else:
+        convert('v2/train.json.gz', 'train.tsv', False, args['threads'], args['version'])
+        convert('v2/dev.json.gz', 'dev.tsv', False, args['threads'], args['version'])
+        convert('v2/test.json.gz', 'test.tsv', True, args['threads'], args['version'])
+        convert('v2/test_public.json.gz', 'test_public.tsv', True, args['threads'], args['version'])
+
