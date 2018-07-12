@@ -59,17 +59,6 @@ class PolyMath:
     def embed(self):
         npglove = np.zeros((self.wg_dim, 1024 + 300), dtype=np.float32)
         hf = h5py.File(os.path.join(self.abs_path, '../data/elmo_embedding.bin'), 'r')
-        #f5_exception = dict()
-
-        ## add vocab_use map
-        #vocabs_use = dict()
-        #for v in self.vocab:
-        #    vocabs_use[v] = False
-
-        #with open(os.path.join(self.abs_path, '../dataset/elmo_out_of_glove.txt'), encoding='utf-8') as f:
-        #    for line in f:
-        #        parts = line.split()
-        #        f5_exception[parts[0]] = np.asarray([float(p) for p in parts[-1024:]])
 
         with open(os.path.join(self.abs_path, '../data/glove.840B.300d.txt'), encoding='utf-8') as f:
             for line in f:
@@ -80,18 +69,8 @@ class PolyMath:
                         if len(parts) == 301:
                             npglove[self.vocab[word],:300] = np.asarray([float(p) for p in parts[-300:]])
                             npglove[self.vocab[word],300:] = np.average(hf[word][:], axis=0)
-#                            vocabs_use[word] = True
                     except:
                         npglove[self.vocab[word],300:] = np.average(hf['<UNK>'][:], axis=0)
-                        print(word)
-
-        #for v in vocabs_use:
-        #    if vocabs_use[v] == False:
-        #        try:
-        #            print(v)
-        #            npglove[self.vocab[word], 300:] = f5_exception[v]
-        #        except:
-        #            print('except: ', v)
 
         glove = C.constant(npglove)
         nonglove = C.parameter(shape=(self.wn_dim, 1024 + 300), init=C.glorot_uniform(), name='TrainableE')
