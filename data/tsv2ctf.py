@@ -10,7 +10,7 @@ char_count_threshold = data_config['char_count_threshold']
 word_size = data_config['word_size']
 
 sanitize = str.maketrans({"|": None, "\n": None})
-tsvs = ['train', 'dev', 'test', 'test_public']
+tsvs = ['train', 'dev']
 unk = '<UNK>'
 pad = ''
 EMPTY_TOKEN = '<NULL>'
@@ -76,7 +76,7 @@ def tsv_iter(line, vocab, chars, known, is_test=False, misc={}):
     ctokens = context.split(' ')
     qtokens = query.split(' ')
 
-    #replace EMPTY_TOKEN with ''
+    # replace EMPTY_TOKEN with ''
     ctokens = [t if t != EMPTY_TOKEN else '' for t in ctokens]
     qtokens = [t if t != EMPTY_TOKEN else '' for t in qtokens]
 
