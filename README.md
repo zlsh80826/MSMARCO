@@ -3,11 +3,11 @@
 GENERATION FOR MACHINE READING COMPREHENSION](https://arxiv.org/pdf/1706.04815.pdf) with some modifications. 
 * This project is designed for the [MSMARCO](http://www.msmarco.org/) dataset
 * Code structure is based on [CNTK BIDAF Example](https://github.com/Microsoft/CNTK/tree/nikosk/bidaf/Examples/Text/BidirectionalAttentionFlow/msmarco)
+* Support MSMARCO V1 and V2!
 
 ## Requirements
 
-There are some required library for training, if you have any problem, please contact me. 
-Here are the suggested version.
+Here are some required libraries for training.
 
 ### General
 * python3.6
@@ -18,35 +18,85 @@ Here are the suggested version.
 ### Python
 * Please refer requirements.txt
 
-## Usage
+## Usage 
 
 ### Preprocess
-Download MSMARCO dataset, GloVe embedding.
-```
+
+#### MSMARCO V1
+Download MSMARCO v1 dataset, GloVe embedding.
+
+```Bash
 cd data
 python3.6 download.py v1
 ```
 
 Convert raw data to tsv format
-```
-python3.6 convert_msmarco.py
+
+```Bash
+python3.6 convert_msmarco.py --threads=`nproc` 
 ```
 
 Convert tsv format to ctf(CNTK input) format and build vocabs dictionary
-```
+
+```Bash
 python3.6 tsv2ctf.py
 ```
 
 Generate elmo embedding
-```
+
+```Bash
 sh elmo.sh
 ```
 
-### Train
-``` 
+#### MSMARCO V2
+
+Download MSMARCO v2 dataset, GloVe embedding.
+
+```Bash
+cd data
+python3.6 download.py v2
+```
+
+Convert raw data to tsv format
+
+```Bash
+python3.6 convert_msmarco.py --threads=`nproc` --ratio=0.1
+```
+
+Convert tsv format to ctf(CNTK input) format and build vocabs dictionary
+
+```Bash
+python3.6 tsv2ctf.py
+```
+
+Generate elmo embedding
+
+```Bash
+sh elmo.sh
+```
+
+### Train (Same for V1 and V2)
+
+```Bash
 cd ../script
 mkdir log
 sh run.sh
+```
+
+### Evaluate develop dataset
+
+#### MSMARCO V1
+
+```Bash
+cd Evaluation
+sh eval.sh v1
+```
+
+#### MSMARCO v2
+
+```Bash
+cd Evaluation
+sh eval.sh v2
 ```
 
 ### Performance
@@ -61,13 +111,12 @@ sh run.sh
 ||rouge-l|bleu_1|
 |---|---|---|
 |MSMARCO v1 w/o elmo|38.43 | 39.14|
-|MSMARCO v1 w/  elmo|39.45 | 39.47|
-|MSMARCO v2 w/o elmo|working|working|
+|MSMARCO v1 w/  elmo|39.42 | 39.47|
 |MSMARCO v2 w   elmo|working|working|
 
 ## TODO
-- [ ] Multi-threads preprocessing 
+- [X] Multi-threads preprocessing 
 - [X] Elmo-Embedding
 - [X] Evaluation script
-- [ ] MSMARCO v2 support
+- [X] MSMARCO v2 support
 - [ ] Reasonable metrics
