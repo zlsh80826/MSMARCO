@@ -1,8 +1,14 @@
 data/v1/*
+data/v2/*
 data/glove*
+script/log
+model
+output.json
 .vscode
 *__pycache__*
 *.tsv
 *.ctf
 *.pkl
+*.txt
 data/elmo_embedding.bin
+Evaluation/sample_test_data/v2_dev_no_answer.json
