@@ -149,17 +149,17 @@ if __name__ == '__main__':
     parser.add_argument('--threads', help='Number of threads to multi-preprocessing', default=1, type=int)
     parser.add_argument('--ratio', help='Ratio of dev data', default=1, type=float)
     parser.add_argument('version', choices=['v1', 'v2'])
-    args = vars(parser.parse_args())
+    args = parser.parse_args()
 
     if args['version'] == 'v1':
-        convert('v1/train.json.gz', 'train.tsv', False, args['threads'], args['version'], args['ratio'])
-        convert('v1/dev.json.gz', 'dev.tsv', False, args['threads'], args['version'], args['ratio'])
-        convert('v1/test.json.gz', 'test.tsv', True, args['threads'], args['version'], args['ratio'])
-        convert('v1/test_public.json.gz', 'test_public.tsv', True, args['threads'], args['version'], args['ratio'])
+        convert('v1/train.json.gz', 'train.tsv', False, args.threads, args.version, args.ratio)
+        convert('v1/dev.json.gz', 'dev.tsv', False, args.threads, args.version, args.ratio)
+        convert('v1/test.json.gz', 'test.tsv', True, args.threads, args.version, args.ratio)
+        convert('v1/test_public.json.gz', 'test_public.tsv', True, args.threads, args.version, args.ratio)
 
     else:
-        # convert('v2/train.json.gz', 'train.tsv', False, args['threads'], args['version'], args['ratio'])
-        # convert('v2/dev.json.gz', 'dev.tsv', False, args['threads'], args['version'], args['ratio'])
-        convert('v2/test.json.gz', 'test.tsv', True, args['threads'], args['version'], args['ratio'])
-        convert('v2/test_public.json.gz', 'test_public.tsv', True, args['threads'], args['version'], args['ratio'])
+        convert('v2/train.json.gz', 'train.tsv', False, args.threads, args.version, args.ratio)
+        convert('v2/dev.json.gz', 'dev.tsv', False, args.threads, args.version, args.ratio)
+        convert('v2/test.json.gz', 'test.tsv', True, args.threads, args.version, args.ratio)
+        convert('v2/test_public.json.gz', 'test_public.tsv', True, args.threads, args.version, args.ratio)
 
