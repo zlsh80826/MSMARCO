@@ -48,7 +48,8 @@ def process(i, j, is_test):
     if yesno:
         temp += ' Yes No Answer Present.'
     else:
-        temp += ' No Answer Present.'
+        if random.random() > 0.7:
+            temp += ' No Answer Present.'
     context = preprocess(temp)
 
     ctokens = trim_empty(tokenize(context, context_mode=True))
@@ -116,7 +117,7 @@ def convert(file_name, outfile, is_test, num_threads, version, ratio):
                 dict_ = dict()
                 dict_['passages'] = raw_data['passages'][id_]
                 dict_['query'] = raw_data['query'][id_]
-                dict_['query_id'] = id_
+                dict_['query_id'] = raw_data['query_id'][id_]
                 dict_['query_type'] = raw_data['query_type'][id_]
                 if not is_test:
                     dict_['answers'] = raw_data['answers'][id_]
@@ -151,7 +152,7 @@ if __name__ == '__main__':
     parser.add_argument('version', choices=['v1', 'v2'])
     args = parser.parse_args()
 
-    if args['version'] == 'v1':
+    if args.version == 'v1':
         convert('v1/train.json.gz', 'train.tsv', False, args.threads, args.version, args.ratio)
         convert('v1/dev.json.gz', 'dev.tsv', False, args.threads, args.version, args.ratio)
         convert('v1/test.json.gz', 'test.tsv', True, args.threads, args.version, args.ratio)
