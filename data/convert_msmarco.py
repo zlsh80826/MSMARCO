@@ -46,10 +46,7 @@ def process(i, j, is_test):
 
     temp = ' '.join(pp['passage_text'] for pp in p)
     if yesno:
-        temp += ' Yes No Answer Present.'
-    else:
-        if random.random() > 0.7:
-            temp += ' No Answer Present.'
+        temp += ' Yes No'
     context = preprocess(temp)
 
     ctokens = trim_empty(tokenize(context, context_mode=True))
@@ -79,7 +76,7 @@ def process(i, j, is_test):
                         (start, end), (_, _), score = smith_waterman(normalized_context_lower.split(), natokens)
                         start -= 1
                         ratio = 0.5 * score / min(len(nctokens), len(natokens))
-                        if ratio < 0.8:
+                        if ratio < 0.75:
                             bad = True
                     except:
                         bad = True
@@ -94,7 +91,7 @@ def process(i, j, is_test):
         
     return outputs
                 
-def convert(file_name, outfile, is_test, num_threads, version, ratio):
+def convert(file_name, outfile, is_test, threads, version, ratio):
     print('Generating', outfile, '...')
     start = time.perf_counter()
 
@@ -115,17 +112,21 @@ def convert(file_name, outfile, is_test, num_threads, version, ratio):
 
             if file_name.find('dev') < 0 or select:
                 dict_ = dict()
+                if outfile != 'test_public.tsv':
+                    if raw_data['answers'][id_][0] == 'No Answer Present.':
+                        continue
+                    else:
+                        dict_['answers'] = raw_data['answers'][id_]
+                        
                 dict_['passages'] = raw_data['passages'][id_]
                 dict_['query'] = raw_data['query'][id_]
                 dict_['query_id'] = raw_data['query_id'][id_]
                 dict_['query_type'] = raw_data['query_type'][id_]
-                if not is_test:
-                    dict_['answers'] = raw_data['answers'][id_]
                 data.append(dict_)
     else:
         raise NotImplementedError
 
-    with multiprocessing.Pool(num_threads) as pool:
+    with multiprocessing.Pool(threads) as pool:
         results = []
         for idx, d in enumerate(tqdm(data)):
             result = pool.apply_async(process, args=(idx, d, is_test))
@@ -151,16 +152,10 @@ if __name__ == '__main__':
     parser.add_argument('--ratio', help='Ratio of dev data', default=1, type=float)
     parser.add_argument('version', choices=['v1', 'v2'])
     args = parser.parse_args()
+    var = vars(args)
 
-    if args.version == 'v1':
-        convert('v1/train.json.gz', 'train.tsv', False, args.threads, args.version, args.ratio)
-        convert('v1/dev.json.gz', 'dev.tsv', False, args.threads, args.version, args.ratio)
-        convert('v1/test.json.gz', 'test.tsv', True, args.threads, args.version, args.ratio)
-        convert('v1/test_public.json.gz', 'test_public.tsv', True, args.threads, args.version, args.ratio)
-
-    else:
-        convert('v2/train.json.gz', 'train.tsv', False, args.threads, args.version, args.ratio)
-        convert('v2/dev.json.gz', 'dev.tsv', False, args.threads, args.version, args.ratio)
-        convert('v2/test.json.gz', 'test.tsv', True, args.threads, args.version, args.ratio)
-        convert('v2/test_public.json.gz', 'test_public.tsv', True, args.threads, args.version, args.ratio)
+    convert(args.version + '/train.json.gz', 'train.tsv', False, args.threads, args.version, args.ratio)
+    convert(args.version + '/dev.json.gz', 'dev.tsv', False, args.threads, args.version, args.ratio)
+    convert(args.version + '/test.json.gz', 'test.tsv', True, **var)
+    convert(args.version + '/test_public.json.gz', 'test_public.tsv', True, args.threads, args.version, args.ratio)
 
