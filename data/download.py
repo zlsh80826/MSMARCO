@@ -29,7 +29,7 @@ def download(version):
         try:
             os.makedirs('v1')
         except OSError as e:
-            if e.errno != errno.EEIST:
+            if e.errno != errno.EEXIST:
                 raise
             
         for url in v1_url:
@@ -42,7 +42,7 @@ def download(version):
         try:
             os.makedirs('v2')
         except OSError as e:
-            if e.errno != errno.EEIST:
+            if e.errno != errno.EEXIST:
                 raise
 
         for url in v2_url:
