@@ -1,9 +1,9 @@
-from collections import defaultdict
 from itertools import count, zip_longest
-from config import *
-import pickle
-import numpy as np
+from collections import defaultdict
 from tqdm import tqdm
+from config import *
+import numpy as np
+import pickle
 
 word_count_threshold = data_config['word_count_threshold']
 char_count_threshold = data_config['char_count_threshold']
@@ -20,9 +20,9 @@ def populate_dicts(files):
     print('Generating dicts')
     vocab = defaultdict(count().__next__)
     chars = defaultdict(count().__next__)
+    test_wdcnt = defaultdict(int)
     wdcnt = defaultdict(int)
     chcnt = defaultdict(int)
-    test_wdcnt = defaultdict(int)
 
     # count the words and characters to find the ones with cardinality above the thresholds
     for f in files:
@@ -47,7 +47,7 @@ def populate_dicts(files):
             word = line.split()[0].lower()
             if wdcnt[word] >= 1 or test_wdcnt[word] >= 1: 
                 _ = vocab[word]
-    known =len(vocab)
+    known = len(vocab)
 
     # add the special markers
     _ = vocab[pad]
@@ -89,8 +89,8 @@ def tsv_iter(line, vocab, chars, known, is_test=False, misc={}):
     if ba > ea:
         raise ValueError('answer problem with input line:\n%s' % line)
 
-    baidx = [0 if i != ba else 1 for i,t in enumerate(ctokens)]
-    eaidx = [0 if i != ea else 1 for i,t in enumerate(ctokens)]
+    baidx = [0 if i != ba else 1 for i, t in enumerate(ctokens)]
+    eaidx = [0 if i != ea else 1 for i, t in enumerate(ctokens)]
     
     atokens = answer.split(' ')
     
@@ -108,44 +108,49 @@ def tsv_to_ctf(f, g, vocab, chars, known, is_test):
     print("Known words: %d" % known)
     print("Vocab size: %d" % len(vocab))
     print("Char size: %d" % len(chars))
-    for lineno, line in enumerate(f):
-        ctokens, qtokens, atokens, cwids, qwids,  baidx,   eaidx, ccids, qcids = tsv_iter(line, vocab, chars, known, is_test)
 
-        for     ctoken,  qtoken,  atoken,  cwid,  qwid,   begin,   end,   ccid,  qcid in zip_longest(
-                ctokens, qtokens, atokens, cwids, qwids,  baidx,   eaidx, ccids, qcids):
-            out = [str(lineno)]
-            if ctoken is not None:
-                out.append('|# %s' % pad_spec.format(ctoken.translate(sanitize)))
-            if qtoken is not None:
-                out.append('|# %s' % pad_spec.format(qtoken.translate(sanitize)))
-            if atoken is not None:
-                out.append('|# %s' % pad_spec.format(atoken.translate(sanitize)))
-            if begin is not None:
-                out.append('|ab %3d' % begin)
-            if end is not None:
-                out.append('|ae %3d' % end)
-            if cwid is not None:
-                if cwid >= known:
-                    out.append('|cgw {}:{}'.format(0, 0))
-                    out.append('|cnw {}:{}'.format(cwid - known, 1))
-                else:
-                    out.append('|cgw {}:{}'.format(cwid, 1))
-                    out.append('|cnw {}:{}'.format(0, 0))
-            if qwid is not None:
-                if qwid >= known:
-                    out.append('|qgw {}:{}'.format(0, 0))
-                    out.append('|qnw {}:{}'.format(qwid - known, 1))
-                else:
-                    out.append('|qgw {}:{}'.format(qwid, 1))
-                    out.append('|qnw {}:{}'.format(0, 0))
-            if ccid is not None:
-                outc = ' '.join(['%d' % c for c in ccid+[0]*max(word_size - len(ccid), 0)])
-                out.append('|cc %s' % outc)
-            if qcid is not None:
-                outq = ' '.join(['%d' % c for c in qcid+[0]*max(word_size - len(qcid), 0)])
-                out.append('|qc %s' % outq)
-            g.write('\t'.join(out))
-            g.write('\n')
+    num_lines = sum(1 for line in f)
+    f.seek(0)
+
+    with tqdm(total=num_lines, ncols=32) as progress_bar:
+        for lineno, line in enumerate(f):
+            ctokens, qtokens, atokens, cwids, qwids, baidx, eaidx, ccids, qcids = tsv_iter(line, vocab, chars, known, is_test)
+
+            for ctoken,  qtoken,  atoken,  cwid,  qwid,  begin, end,   ccid,  qcid in zip_longest(
+                ctokens, qtokens, atokens, cwids, qwids, baidx, eaidx, ccids, qcids):
+                out = [str(lineno)]
+                if ctoken is not None:
+                    out.append('|# %s' % pad_spec.format(ctoken.translate(sanitize)))
+                if qtoken is not None:
+                    out.append('|# %s' % pad_spec.format(qtoken.translate(sanitize)))
+                if atoken is not None:
+                    out.append('|# %s' % pad_spec.format(atoken.translate(sanitize)))
+                if begin is not None:
+                    out.append('|ab %3d' % begin)
+                if end is not None:
+                    out.append('|ae %3d' % end)
+                if cwid is not None:
+                    if cwid >= known:
+                        out.append('|cgw {}:{}'.format(0, 0))
+                        out.append('|cnw {}:{}'.format(cwid - known, 1))
+                    else:
+                        out.append('|cgw {}:{}'.format(cwid, 1))
+                        out.append('|cnw {}:{}'.format(0, 0))
+                if qwid is not None:
+                    if qwid >= known:
+                        out.append('|qgw {}:{}'.format(0, 0))
+                        out.append('|qnw {}:{}'.format(qwid - known, 1))
+                    else:
+                        out.append('|qgw {}:{}'.format(qwid, 1))
+                        out.append('|qnw {}:{}'.format(0, 0))
+                if ccid is not None:
+                    outc = ' '.join(['%d' % c for c in ccid + [0] * max(word_size - len(ccid), 0)])
+                    out.append('|cc %s' % outc)
+                if qcid is not None:
+                    outq = ' '.join(['%d' % c for c in qcid + [0] * max(word_size - len(qcid), 0)])
+                    out.append('|qc %s' % outq)
+                g.write('\t'.join(out))
+                g.write('\n')
 
 if __name__=='__main__':
     try:
