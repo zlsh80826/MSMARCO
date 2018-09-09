@@ -8,6 +8,7 @@ import argparse
 import importlib
 import time
 import json
+from tqdm import tqdm
 
 model_name = "pm.model"
 
@@ -66,7 +67,7 @@ def create_tsv_reader(func, tsv_file, polymath, seqs, num_workers, is_test=False
                     import re
                     misc['uid'].append(re.match('^([^\t]*)', line).groups()[0])
 
-                ctokens, qtokens, atokens, cwids, qwids,  baidx,   eaidx, ccids, qcids = tsv2ctf.tsv_iter(line, polymath.vocab, polymath.chars, polymath.wg_dim, is_test, misc)
+                ctokens, qtokens, atokens, cwids, qwids, baidx, eaidx, ccids, qcids = tsv2ctf.tsv_iter(line, polymath.vocab, polymath.chars, polymath.wg_dim, is_test, misc)
 
                 batch['cwids'].append(cwids)
                 batch['qwids'].append(qwids)
@@ -101,7 +102,9 @@ def train(data_path, model_path, log_file, config_file, restore=False, profiling
     z, loss = polymath.model()
     training_config = importlib.import_module(config_file).training_config
 
+    minibatch_size = training_config['minibatch_size']
     max_epochs = training_config['max_epochs']
+    epoch_size = training_config['epoch_size']
     log_freq = training_config['log_freq']
 
     progress_writers = [C.logging.ProgressPrinter(
@@ -112,7 +115,7 @@ def train(data_path, model_path, log_file, config_file, restore=False, profiling
                             rank = C.Communicator.rank(),
                             gen_heartbeat = gen_heartbeat)]
 
-    lr = C.learning_parameter_schedule(training_config['lr'], minibatch_size=None, epoch_size=None)
+    lr = C.learning_parameter_schedule(training_config['lr'], minibatch_size=minibatch_size, epoch_size=epoch_size)
 
     ema = {}
     dummies = []
@@ -177,24 +180,28 @@ def train(data_path, model_path, log_file, config_file, restore=False, profiling
     if train_data_ext == '.ctf':
         mb_source, input_map = create_mb_and_map(loss, train_data_file, polymath)
 
-        minibatch_size = training_config['minibatch_size'] # number of samples
-        epoch_size = training_config['epoch_size']
 
         for epoch in range(max_epochs):
             num_seq = 0
-            while True:
-                if trainer.total_number_of_samples_seen >= training_config['distributed_after']:
-                    data = mb_source.next_minibatch(minibatch_size*C.Communicator.num_workers(), input_map=input_map, num_data_partitions=C.Communicator.num_workers(), partition_index=C.Communicator.rank())
-                else:
-                    data = mb_source.next_minibatch(minibatch_size, input_map=input_map)
+            with tqdm(total=epoch_size, ncols=32, smoothing=0.1) as progress_bar:
+                while True:
+                    if trainer.total_number_of_samples_seen >= training_config['distributed_after']:
+                        data = mb_source.next_minibatch(
+                            minibatch_size * C.Communicator.num_workers(), input_map=input_map, 
+                            num_data_partitions = C.Communicator.num_workers(), 
+                            partition_index = C.Communicator.rank())
+                    else:
+                        data = mb_source.next_minibatch(minibatch_size, input_map=input_map)
 
-                trainer.train_minibatch(data)
-                num_seq += trainer.previous_minibatch_sample_count
-                dummy.eval()
-                if num_seq >= epoch_size:
+                    trainer.train_minibatch(data)
+                    num_seq += trainer.previous_minibatch_sample_count
+                    dummy.eval()
+                    if num_seq >= epoch_size:
+                        break
+                    else:
+                        progress_bar.update(trainer.previous_minibatch_sample_count)
+                if not post_epoch_work(epoch_stat):
                     break
-            if not post_epoch_work(epoch_stat):
-                break
     else:
         if train_data_ext != '.tsv':
             raise Exception("Unsupported format")
@@ -250,28 +257,30 @@ def validate_model(test_data, model, polymath):
     stats = C.splice(s(f1), s(exact_match), s(precision), s(recall), s(overlap), s(begin_match), s(end_match))
 
     # Evaluation parameters
-    minibatch_size = 1024
+    minibatch_size = 2048
     num_sequences = 0
 
     stat_sum = 0
     loss_sum = 0
-
-    while True:
-        data = mb_source.next_minibatch(minibatch_size, input_map=input_map)
-        if not data or not (begin_label in data) or data[begin_label].num_sequences == 0:
-            break
-        out = model.eval(data, outputs=[begin_logits,end_logits,loss], as_numpy=False)
-        testloss = out[loss]
-        g = best_span_score.grad({begin_prediction:out[begin_logits], end_prediction:out[end_logits]}, wrt=[begin_prediction,end_prediction], as_numpy=False)
-        other_input_map = {begin_prediction: g[begin_prediction], end_prediction: g[end_prediction], begin_label: data[begin_label], end_label: data[end_label]}
-        stat_sum += stats.eval((other_input_map))
-        loss_sum += np.sum(testloss.asarray())
-        num_sequences += data[begin_label].num_sequences
+    
+    with tqdm(ncols=32) as progress_bar:
+        while True:
+            data = mb_source.next_minibatch(minibatch_size, input_map=input_map)
+            if not data or not (begin_label in data) or data[begin_label].num_sequences == 0:
+                break
+            out = model.eval(data, outputs=[begin_logits,end_logits,loss], as_numpy=False)
+            testloss = out[loss]
+            g = best_span_score.grad({begin_prediction:out[begin_logits], end_prediction:out[end_logits]}, wrt=[begin_prediction,end_prediction], as_numpy=False)
+            other_input_map = {begin_prediction: g[begin_prediction], end_prediction: g[end_prediction], begin_label: data[begin_label], end_label: data[end_label]}
+            stat_sum += stats.eval((other_input_map))
+            loss_sum += np.sum(testloss.asarray())
+            num_sequences += data[begin_label].num_sequences
+            progress_bar.update(data[begin_label].num_sequences)
 
     stat_avg = stat_sum / num_sequences
     loss_avg = loss_sum / num_sequences
 
-    print("Validated {} sequences, loss {:.4f}, F1 {:.4f}, EM {:.4f}, precision {:4f}, recall {:4f} hasOverlap {:4f}, start_match {:4f}, end_match {:4f}".format(
+    print("\nValidated {} sequences, loss {:.4f}, F1 {:.4f}, EM {:.4f}, precision {:4f}, recall {:4f} hasOverlap {:4f}, start_match {:4f}, end_match {:4f}".format(
             num_sequences,
             loss_avg,
             stat_avg[0],
@@ -318,29 +327,37 @@ def test(test_data, model_path, model_file, config_file):
     best_span_score = symbolic_best_span(begin_prediction, end_prediction)
     predicted_span = C.layers.Recurrence(C.plus)(begin_prediction - C.sequence.past_value(end_prediction))
 
-    batch_size = 8 # in sequences
+    with open(test_data) as f:
+        num_test = sum(1 for line in f)
+
+    batch_size = 16 # in sequences
     misc = {'rawctx':[], 'ctoken':[], 'answer':[], 'uid':[]}
     tsv_reader = create_tsv_reader(loss, test_data, polymath, batch_size, 1, is_test=True, misc=misc)
     results = {}
-    with open('{}_out.json'.format(model_file), 'w', encoding='utf-8') as json_output:
-        for data in tsv_reader:
-            out = model.eval(data, outputs=[begin_logits,end_logits,loss], as_numpy=False)
-            g = best_span_score.grad({begin_prediction:out[begin_logits], end_prediction:out[end_logits]}, wrt=[begin_prediction,end_prediction], as_numpy=False)
-            other_input_map = {begin_prediction: g[begin_prediction], end_prediction: g[end_prediction]}
-            span = predicted_span.eval((other_input_map))
-            for seq, (raw_text, ctokens, answer, uid) in enumerate(zip(misc['rawctx'], misc['ctoken'], misc['answer'], misc['uid'])):
-                seq_where = np.argwhere(span[seq])[:,0]
-                span_begin = np.min(seq_where)
-                span_end = np.max(seq_where)
-                predict_answer = get_answer(raw_text, ctokens, span_begin, span_end)
-                results['query_id'] = int(uid)
-                results['answers'] = [predict_answer]
-                json.dump(results, json_output)
-                json_output.write("\n")
-            misc['rawctx'] = []
-            misc['ctoken'] = []
-            misc['answer'] = []
-            misc['uid'] = []
+
+    with tqdm(total=num_test, ncols=32) as progress_bar:
+        with open('{}_out.json'.format(model_file), 'w', encoding='utf-8') as json_output:
+            for data in tsv_reader:
+                out = model.eval(data, outputs=[begin_logits, end_logits, loss], as_numpy=False)
+                g = best_span_score.grad({begin_prediction: out[begin_logits], end_prediction: out[end_logits]}, 
+                    wrt=[begin_prediction,end_prediction], as_numpy=False)
+                other_input_map = {begin_prediction: g[begin_prediction], end_prediction: g[end_prediction]}
+                span = predicted_span.eval((other_input_map))
+                for seq, (raw_text, ctokens, answer, uid) in enumerate(
+                    zip(misc['rawctx'], misc['ctoken'], misc['answer'], misc['uid'])):
+                    seq_where = np.argwhere(span[seq])[:, 0]
+                    span_begin = np.min(seq_where)
+                    span_end = np.max(seq_where)
+                    predict_answer = get_answer(raw_text, ctokens, span_begin, span_end)
+                    results['query_id'] = int(uid)
+                    results['answers'] = [predict_answer]
+                    json.dump(results, json_output)
+                    json_output.write("\n")
+                misc['rawctx'] = []
+                misc['ctoken'] = []
+                misc['answer'] = []
+                misc['uid'] = []
+                progress_bar.update(batch_size)
 
 if __name__=='__main__':
     # default Paths relative to current python file.
@@ -366,8 +383,6 @@ if __name__=='__main__':
     if args['datadir'] is not None:
         data_path = args['datadir']
         
-    #C.try_set_default_device(C.gpu(0))
-
     test_data = args['test']
     test_model = args['model']
     if test_data:
