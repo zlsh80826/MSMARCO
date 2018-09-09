@@ -13,11 +13,14 @@ class PolyMath:
         data_config = importlib.import_module(config_file).data_config
         model_config = importlib.import_module(config_file).model_config
 
+        self.data_config = data_config
+        self.model_config = model_config
+
         self.word_count_threshold = data_config['word_count_threshold']
         self.char_count_threshold = data_config['char_count_threshold']
         self.word_size = data_config['word_size']
         self.abs_path = os.path.dirname(os.path.abspath(__file__))
-        pickle_file = os.path.join(self.abs_path, data_config['pickle_file'])
+        pickle_file = os.path.join(self.abs_path, self.data_config['pickle_file'])
 
         with open(pickle_file, 'rb') as vf:
             known, self.vocab, self.chars = pickle.load(vf)
@@ -28,6 +31,7 @@ class PolyMath:
         self.a_dim = 1
 
         self.hidden_dim = model_config['hidden_dim']
+        self.elmo_dim = model_config['elmo_dim']
         self.convs = model_config['char_convs']
         self.dropout = model_config['dropout']
         self.char_emb_dim = model_config['char_emb_dim']
@@ -57,23 +61,24 @@ class PolyMath:
         return C.reduce_max(conv_out, axis=1)
 
     def embed(self):
-        npglove = np.zeros((self.wg_dim, 1024 + 300), dtype=np.float32)
-        hf = h5py.File(os.path.join(self.abs_path, '../data/elmo_embedding.bin'), 'r')
+        
+        npglove = np.zeros((self.wg_dim, self.elmo_dim + self.hidden_dim), dtype=np.float32)
+        hf = h5py.File(os.path.join(self.abs_path, self.data_config['elmo_embedding']), 'r')
 
-        with open(os.path.join(self.abs_path, '../data/glove.840B.300d.txt'), encoding='utf-8') as f:
+        with open(os.path.join(self.abs_path, self.data_config['glove_embedding']), encoding='utf-8') as f:
             for line in f:
                 parts = line.split()
                 word = parts[0].lower()
                 if word in self.vocab:
                     try:
                         if len(parts) == 301:
-                            npglove[self.vocab[word],:300] = np.asarray([float(p) for p in parts[-300:]])
-                            npglove[self.vocab[word],300:] = np.average(hf[word][:], axis=0)
+                            npglove[self.vocab[word], :300] = np.asarray([float(p) for p in parts[-300:]])
+                            npglove[self.vocab[word], 300:] = np.average(hf[word][:], axis=0)
                     except:
                         npglove[self.vocab[word],300:] = np.average(hf['<UNK>'][:], axis=0)
 
         glove = C.constant(npglove)
-        nonglove = C.parameter(shape=(self.wn_dim, 1024 + 300), init=C.glorot_uniform(), name='TrainableE')
+        nonglove = C.parameter(shape=(self.wn_dim, self.elmo_dim + self.hidden_dim), init=C.glorot_uniform(), name='TrainableE')
         
         def func(wg, wn):
             return C.times(wg, glove) + C.times(wn, nonglove)
@@ -96,7 +101,8 @@ class PolyMath:
             C.reshape(self.charcnn(input_chars), self.convs),
             self.embed()(input_glove_words, input_nonglove_words), name='splice_embed')
 
-        highway = HighwayNetwork(dim=1024 + 600, highway_layers=self.highway_layers)(embedded)
+        highway = HighwayNetwork(dim=self.elmo_dim + self.hidden_dim + self.convs, 
+                                 highway_layers=self.highway_layers)(embedded)
         highway_drop = C.layers.Dropout(self.dropout)(highway)
         processed = OptimizedRnnStack(self.hidden_dim,
              num_layers=1,
