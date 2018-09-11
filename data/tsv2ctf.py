@@ -151,6 +151,7 @@ def tsv_to_ctf(f, g, vocab, chars, known, is_test):
                     out.append('|qc %s' % outq)
                 g.write('\t'.join(out))
                 g.write('\n')
+            progress_bar.update(1)
 
 if __name__=='__main__':
     try:
