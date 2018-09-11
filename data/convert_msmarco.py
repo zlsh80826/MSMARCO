@@ -1,4 +1,5 @@
 from utils import smith_waterman
+from itertools import repeat
 import multiprocessing
 from tqdm import tqdm
 import numpy as np
