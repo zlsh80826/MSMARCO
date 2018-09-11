@@ -115,7 +115,7 @@ def train(data_path, model_path, log_file, config_file, restore=False, profiling
                             rank = C.Communicator.rank(),
                             gen_heartbeat = gen_heartbeat)]
 
-    lr = C.learning_parameter_schedule(training_config['lr'], minibatch_size=minibatch_size, epoch_size=epoch_size)
+    lr = C.learning_parameter_schedule(training_config['lr'], minibatch_size=None, epoch_size=None)
 
     ema = {}
     dummies = []
