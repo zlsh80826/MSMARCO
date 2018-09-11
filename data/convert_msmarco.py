@@ -35,12 +35,13 @@ def tokenize(s, context_mode=False ):
 def trim_empty(tokens):
     return [t for t in tokens if t != '']
 
-def process(i, j, is_test):
-    p = j['passages']
+def process(args):
+    data, is_test = args
+    p = data['passages']
     outputs = []
 
 
-    query   = preprocess(j['query'])
+    query   = preprocess(data['query'])
     qtokens =  trim_empty(tokenize(query))
     yesno   = False
 
@@ -59,7 +60,7 @@ def process(i, j, is_test):
     nctokens = normalized_context.split()
 
     if not is_test:
-        for a in j['answers']:
+        for a in data['answers']:
             bad = False
             answer = preprocess(a)
             if answer == '':
@@ -86,12 +87,12 @@ def process(i, j, is_test):
                     except:
                         bad = True
                 if not bad:
-                    output = [str(j['query_id']), j['query_type'], 
+                    output = [str(data['query_id']), data['query_type'], 
                           ' '.join(nctokens), ' '.join(qtokens),
                           ' '.join(nctokens[start:end]), str(start), str(end)]
                     outputs.append(output)
     else:
-        output = [str(j['query_id']), j['query_type'], ' '.join(nctokens),' '.join(qtokens)]
+        output = [str(data['query_id']), data['query_type'], ' '.join(nctokens),' '.join(qtokens)]
         outputs.append(output)
         
     return outputs
