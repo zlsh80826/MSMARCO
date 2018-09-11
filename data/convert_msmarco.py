@@ -155,6 +155,6 @@ if __name__ == '__main__':
 
     convert(args.version + '/train.json.gz', 'train.tsv', False, args.threads, args.version, args.ratio)
     convert(args.version + '/dev.json.gz', 'dev.tsv', False, args.threads, args.version, args.ratio)
-    convert(args.version + '/test.json.gz', 'test_nltk.tsv', True, **var)
+    convert(args.version + '/test.json.gz', 'test.tsv', True, **var)
     convert(args.version + '/test_public.json.gz', 'test_public.tsv', True, args.threads, args.version, args.ratio)
 
