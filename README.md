@@ -112,7 +112,7 @@ sh eval.sh v2
 |---|---|---|
 |MSMARCO v1 w/o elmo|38.43 | 39.14|
 |MSMARCO v1 w/  elmo|39.42 | 39.47|
-|MSMARCO v2 w   elmo|working|working|
+|MSMARCO v2 w/  elmo|42.10 | 42.46|
 
 ## TODO
 - [X] Multi-threads preprocessing 
