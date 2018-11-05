@@ -22,7 +22,7 @@ def preprocess(s):
 def tokenize(s, context_mode=False ):
     nltk_tokens=[t.replace("''", '"').replace("``", '"') for t in nltk.word_tokenize(s)]
     additional_separators = (
-        "-", "\u2212", "\u2014", "\u2013", "~", '"', "\u201C", "\u2019", "\u201D", "\u2018", "\u00B0")
+        "-", "\u2212", "\u2014", "\u2013", "/", "~", '"', "\u201C", "\u2019", "\u201D", "\u2018", "\u00B0")
         # "-", "\u2212", "\u2014", "\u2013", "/", "~", '"', "'", "\u201C", "\u2019", "\u201D", "\u2018", "\u00B0")
     tokens = []
     for token in nltk_tokens:
@@ -37,12 +37,12 @@ def trim_empty(tokens):
     return [t for t in tokens if t != '']
 
 def process(args):
-    data, is_test = args
-    p = data['passages']
+    j, is_test = args
+
+    p = j['passages']
     outputs = []
 
-
-    query   = preprocess(data['query'])
+    query   = preprocess(j['query'])
     qtokens =  trim_empty(tokenize(query))
     yesno   = False
 
@@ -61,7 +61,7 @@ def process(args):
     nctokens = normalized_context.split()
 
     if not is_test:
-        for a in data['answers']:
+        for a in j['answers']:
             bad = False
             answer = preprocess(a)
             if answer == '':
@@ -83,17 +83,17 @@ def process(args):
                         (start, end), (_, _), score = smith_waterman(normalized_context_lower.split(), natokens)
                         start -= 1
                         ratio = 0.5 * score / min(len(nctokens), len(natokens))
-                        if ratio < 0.75:
+                        if ratio < 0.51:
                             bad = True
                     except:
                         bad = True
                 if not bad:
-                    output = [str(data['query_id']), data['query_type'], 
+                    output = [str(j['query_id']), j['query_type'], 
                           ' '.join(nctokens), ' '.join(qtokens),
                           ' '.join(nctokens[start:end]), str(start), str(end)]
                     outputs.append(output)
     else:
-        output = [str(data['query_id']), data['query_type'], ' '.join(nctokens),' '.join(qtokens)]
+        output = [str(j['query_id']), j['query_type'], ' '.join(nctokens),' '.join(qtokens)]
         outputs.append(output)
         
     return outputs
@@ -155,8 +155,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
     var = vars(args)
 
-    convert(args.version + '/train.json.gz', 'train.tsv', False, args.threads, args.version, args.ratio)
-    convert(args.version + '/dev.json.gz', 'dev.tsv', False, args.threads, args.version, args.ratio)
+    convert(args.version + '/train.json.gz', 'train.tsv', False, **var)
+    convert(args.version + '/dev.json.gz', 'dev.tsv', False, **var)
     convert(args.version + '/test.json.gz', 'test.tsv', True, **var)
-    convert(args.version + '/test_public.json.gz', 'test_public.tsv', True, args.threads, args.version, args.ratio)
+    convert(args.version + '/test_public.json.gz', 'test_public.tsv', True, **var)
 
