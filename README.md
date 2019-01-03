@@ -33,7 +33,7 @@ python3.6 download.py v1
 Convert raw data to tsv format
 
 ```Bash
-python3.6 convert_msmarco.py --threads=`nproc` 
+python3.6 convert_msmarco.py v1 --threads=`nproc` 
 ```
 
 Convert tsv format to ctf(CNTK input) format and build vocabs dictionary
@@ -60,7 +60,7 @@ python3.6 download.py v2
 Convert raw data to tsv format
 
 ```Bash
-python3.6 convert_msmarco.py --threads=`nproc` --ratio=0.1
+python3.6 convert_msmarco.py v2 --threads=`nproc`
 ```
 
 Convert tsv format to ctf(CNTK input) format and build vocabs dictionary
