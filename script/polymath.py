@@ -75,7 +75,7 @@ class PolyMath:
                             npglove[self.vocab[word], :300] = np.asarray([float(p) for p in parts[-300:]])
                             npglove[self.vocab[word], 300:] = np.average(hf[word][:], axis=0)
                     except:
-                        npglove[self.vocab[word],300:] = np.average(hf['<UNK>'][:], axis=0)
+                        npglove[self.vocab[word], 300:] = np.average(hf['<UNK>'][:], axis=0)
 
         glove = C.constant(npglove)
         nonglove = C.parameter(shape=(self.wn_dim, self.elmo_dim + self.hidden_dim), init=C.glorot_uniform(), name='TrainableE')
