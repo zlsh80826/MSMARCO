@@ -1,6 +1,8 @@
 data/v1/*
 data/v2/*
 data/glove*
+data/stderr.log
+data/stdout.log
 script/log
 model
 output.json
