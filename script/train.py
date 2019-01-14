@@ -128,7 +128,7 @@ def train(data_path, model_path, log_file, config_file, restore=False, profiling
     learner = C.adadelta(z.parameters, lr)
 
     if C.Communicator.num_workers() > 1:
-        learner = C.data_parallel_distributed_learner(learner)
+        learner = C.data_parallel_distributed_learner(learner, num_quantization_bits=1)
 
     trainer = C.Trainer(z, (loss, None), learner, progress_writers)
 
