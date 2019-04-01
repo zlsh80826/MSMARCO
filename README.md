@@ -1,6 +1,6 @@
 # MSMARCO with S-NET Extraction
 * A CNTK(Microsoft deep learning toolkit) implementation of [S-NET: FROM ANSR EXTRACTION TO ANSWER
-GENERATION FOR MACHINE READING COMPREHENSION](https://arxiv.org/pdf/1706.04815.pdf) with some modifications. 
+GENERATION FOR MACHINE READING COMPREHENSION](https://arxiv.org/pdf/1706.04815.pdf) extraction part with some modifications. 
 * This project is designed for the [MSMARCO](http://www.msmarco.org/) dataset
 * Code structure is based on [CNTK BIDAF Example](https://github.com/Microsoft/CNTK/tree/nikosk/bidaf/Examples/Text/BidirectionalAttentionFlow/msmarco)
 * Support MSMARCO V1 and V2!
