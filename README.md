@@ -1,4 +1,4 @@
-# MSMARCO with S-NET Extraction
+# MSMARCO with S-NET Extraction (Extraction-net)
 * A CNTK(Microsoft deep learning toolkit) implementation of [S-NET: FROM ANSR EXTRACTION TO ANSWER
 GENERATION FOR MACHINE READING COMPREHENSION](https://arxiv.org/pdf/1706.04815.pdf) extraction part with some modifications. 
 * This project is designed for the [MSMARCO](http://www.msmarco.org/) dataset
@@ -29,9 +29,9 @@ the ``MSMARCO/data`` and ``MSMARCO`` root directory respectively, then decompres
 The code structure should be like
 
 ```Bash
-MSMARCO                                                                                                                  
-├── data                                                                                                                 
-│   ├── elmo_embedding.bin                                                                                               
+MSMARCO
+├── data
+│   ├── elmo_embedding.bin
 │   ├── test.tsv
 │   ├── vocabs.pkl
 │   ├── data.tar.gz
@@ -40,7 +40,7 @@ MSMARCO
 │   ├── pm.model
 │   ├── pm.model.ckp
 │   └── pm.model_out.json
-└── ... others    
+└── ... others
 ```
 
 After decompressing, 
