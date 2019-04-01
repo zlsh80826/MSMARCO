@@ -1,4 +1,4 @@
-# MSMARCO with S-NET extraction
+# MSMARCO with S-NET Extraction
 * A CNTK(Microsoft deep learning toolkit) implementation of [S-NET: FROM ANSR EXTRACTION TO ANSWER
 GENERATION FOR MACHINE READING COMPREHENSION](https://arxiv.org/pdf/1706.04815.pdf) with some modifications. 
 * This project is designed for the [MSMARCO](http://www.msmarco.org/) dataset
