@@ -38,7 +38,7 @@ def download(version):
         os.rename('v1/dev_v1.1.json.gz', 'v1/dev.json.gz')
         os.rename('v1/test_public_v1.1.json.gz', 'v1/test_public.json.gz')
         shutil.copy('v1/dev.json.gz', 'v1/test.json.gz')
-    else:
+    elif (version == 'v2'):
         try:
             os.makedirs('v2')
         except OSError as e:
@@ -56,6 +56,7 @@ def download(version):
     download_glove = True
 
     if os.path.exists('glove.840B.300d.zip'):
+        print('Checking glove md5sum')
         download_glove = not md5check('glove.840B.300d.zip', GLOVE_ZIP_CHECKSUM)
 
     if download_glove:
@@ -67,6 +68,10 @@ def download(version):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Download MSMARCO dataset')
-    parser.add_argument('version', choices=['v1', 'v2'])
+    description = """
+        v1 for MSMARCO v1 dataset and glove embedding
+        v2 for MSMARCO v2 dataset and glove embedding
+        glove for glove embedding only"""
+    parser.add_argument('version', choices=['v1', 'v2', 'glove'], help=description)
     args = parser.parse_args()
     download(args.version)
