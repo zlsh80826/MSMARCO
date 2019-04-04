@@ -1,13 +1,13 @@
-# MSMARCO with S-NET extraction
-* A CNTK(Microsoft deep learning toolkit) implementation of [S-NET: FROM ANSWER EXTRACTION TO ANSWER
-GENERATION FOR MACHINE READING COMPREHENSION](https://arxiv.org/pdf/1706.04815.pdf) with some modifications. 
+# MSMARCO with S-NET Extraction (Extraction-net)
+* A CNTK(Microsoft deep learning toolkit) implementation of [S-NET: FROM ANSR EXTRACTION TO ANSWER
+GENERATION FOR MACHINE READING COMPREHENSION](https://arxiv.org/pdf/1706.04815.pdf) extraction part with some modifications. 
 * This project is designed for the [MSMARCO](http://www.msmarco.org/) dataset
 * Code structure is based on [CNTK BIDAF Example](https://github.com/Microsoft/CNTK/tree/nikosk/bidaf/Examples/Text/BidirectionalAttentionFlow/msmarco)
 * Support MSMARCO V1 and V2!
 
 ## Requirements
 
-Here are some required libraries for training.
+Here are some required libraries for training and evaluations.
 
 ### General
 * python3.6
@@ -17,6 +17,40 @@ Here are some required libraries for training.
 
 ### Python
 * Please refer requirements.txt
+
+## Evaluate with pretrained model
+
+This repo provides pretrained model and pre-processed validation dataset for testing the performance
+
+Please download [pretrained model](https://drive.google.com/open?id=1P9mfJtaFxSSOhshZNmqsjXKS9oN5KEVy) and 
+[pre-processed data](https://drive.google.com/file/d/1aNpxea4r42VrJzPpAg2GMkasTuvT3xkU/view?usp=sharing) and put them on
+the ``MSMARCO/data`` and ``MSMARCO`` root directory respectively, then decompress them at the right places. 
+
+The code structure should be like
+
+```Bash
+MSMARCO
+├── data
+│   ├── elmo_embedding.bin
+│   ├── test.tsv
+│   ├── vocabs.pkl
+│   ├── data.tar.gz
+│   └── ... others
+├── model
+│   ├── pm.model
+│   ├── pm.model.ckp
+│   └── pm.model_out.json
+└── ... others
+```
+
+After decompressing, 
+
+```Bash
+cd Evaluation
+sh eval.sh
+```
+
+then you should get the generated answer and rough-l score.
 
 ## Usage 
 
