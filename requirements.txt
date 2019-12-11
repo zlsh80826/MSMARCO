@@ -55,7 +55,6 @@ ipython-genutils==0.2.0
 ipywidgets==7.4.2
 itsdangerous==1.1.0
 jedi==0.13.2
-Jinja2==2.10
 jmespath==0.9.3
 joblib==0.13.1
 jsondiff==1.1.2
@@ -83,7 +82,7 @@ murmurhash==0.28.0
 natsort==5.3.3
 nbconvert==5.4.0
 nbformat==4.4.0
-nltk==3.3
+nltk==3.4.5
 nose==1.3.7
 notebook==5.7.8
 numpy==1.16.0
@@ -161,11 +160,9 @@ traitlets==4.3.2
 typing==3.6.4
 ujson==1.35
 Unidecode==1.0.22
-urllib3==1.24.1
 wcwidth==0.1.7
 webencodings==0.5.1
 websocket-client==0.54.0
-Werkzeug==0.14.1
 wget==3.2
 widgetsnbextension==3.4.2
 wrapt==1.10.11
