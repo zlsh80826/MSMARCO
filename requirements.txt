@@ -21,7 +21,7 @@ colorama==0.4.1
 conllu==1.2.1
 cookies==2.2.1
 corenlp-protobuf==3.8.0
-cryptography==2.4.2
+cryptography==3.2
 cycler==0.10.0
 cymem==2.0.2
 Cython==0.29.2
