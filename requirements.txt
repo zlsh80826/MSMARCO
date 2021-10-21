@@ -5,7 +5,7 @@ atomicwrites==1.2.1
 attrs==18.2.0
 aws-xray-sdk==2.3.0
 awscli==1.16.88
-Babel==2.6.0
+Babel==2.9.1
 backcall==0.1.0
 bleach==3.1.0
 boto==2.49.0
