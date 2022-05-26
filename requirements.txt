@@ -158,7 +158,7 @@ tornado==5.1.1
 tqdm==4.26.0
 traitlets==4.3.2
 typing==3.6.4
-ujson==1.35
+ujson==5.2.0
 Unidecode==1.0.22
 wcwidth==0.1.7
 webencodings==0.5.1
