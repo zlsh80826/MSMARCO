@@ -56,7 +56,7 @@ ipywidgets==7.4.2
 itsdangerous==1.1.0
 jedi==0.13.2
 jmespath==0.9.3
-joblib==0.13.1
+joblib==1.2.0
 jsondiff==1.1.2
 jsonnet==0.10.0
 jsonpickle==1.0
