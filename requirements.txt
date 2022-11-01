@@ -110,7 +110,7 @@ protobuf==3.6.1
 psutil==5.4.7
 psycopg2==2.7.4
 ptyprocess==0.6.0
-py==1.6.0
+py==1.11.0
 pyaml==17.12.1
 pyasn1==0.4.5
 pycparser==2.19
